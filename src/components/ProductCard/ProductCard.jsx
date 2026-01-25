@@ -4,6 +4,7 @@ import { useFavoritesStore, useCartStore } from '../../store/store';
 import { cloudinaryService } from '../../services/cloudinary/cloudinaryService';
 
 function ProductCard({ product }) {
+  // Используем исправленные методы из хранилища
   const isFavorite = useFavoritesStore((state) => state.isFavorite(product.id));
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
   const addToCart = useCartStore((state) => state.addToCart);
@@ -82,29 +83,35 @@ function ProductCard({ product }) {
     e.target.onerror = null; // Предотвращаем бесконечный цикл
   };
 
- // Обработчик добавления в корзину
-const handleAddToCart = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  console.log('Adding to cart:', {
-    id: product.id,
-    title: product.title,
-    price: product.price,
-    images: product.images
-  });
-  
-  addToCart({
-    id: product.id,
-    title: product.title,
-    price: product.price,
-    images: product.images || [],
-    quantity: 1 // Добавляем поле quantity!
-  });
-  
-  // Можно добавить уведомление
-  // alert('Товар добавлен в корзину!');
-};
+  // Обработчик добавления в корзину
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Adding to cart:', {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      images: product.images
+    });
+    
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      images: product.images || [],
+      quantity: 1
+    });
+  };
+
+  // Обработчик избранного
+  const handleToggleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Toggle favorite for product:', product.id);
+    toggleFavorite(product.id);
+  };
 
   return (
     <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
@@ -138,11 +145,7 @@ const handleAddToCart = (e) => {
             
             {/* Иконка избранного в правом верхнем углу */}
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleFavorite(product.id);
-              }}
+              onClick={handleToggleFavorite}
               className="absolute top-1 right-1 z-10"
               aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
               title={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}

@@ -9,7 +9,10 @@ if (typeof window !== 'undefined') {
     'cart-storage-v3',
     'simple-cart-storage',
     'Cart', 
-    'cart'
+    'cart',
+    'favorites-storage',
+    'favorites-storage-v2',
+    'favorites-storage-v3'
   ];
   oldKeys.forEach(key => {
     if (localStorage.getItem(key)) {
@@ -304,79 +307,222 @@ const useCartStore = create(
   )
 );
 
-// === ИЗБРАННОЕ С ПОДДЕРЖКОЙ ПОЛЬЗОВАТЕЛЕЙ ===
+// === ИЗБРАННОЕ С ПОДДЕРЖКОЙ ПОЛЬЗОВАТЕЛЕЙ (ИСПРАВЛЕННАЯ) ===
 const useFavoritesStore = create(
   persist(
     (set, get) => ({
       userFavorites: {},
       currentUserId: 'guest',
       
+      // === ФУНКЦИИ ВМЕСТО ГЕТТЕРОВ ===
+      
       // Получение избранного текущего пользователя
       getFavorites: () => {
         const state = get();
         const userId = state.currentUserId || 'guest';
-        return state.userFavorites[userId] || [];
+        const favorites = state.userFavorites[userId] || [];
+        
+        console.log('❤️ getFavorites вызван для пользователя:', userId);
+        console.log('❤️ Результат:', favorites.length, 'товаров');
+        
+        return favorites;
       },
+      
+      // === ОСНОВНЫЕ МЕТОДЫ ===
       
       // Установка текущего пользователя
       setCurrentUser: (userId) => {
-        set({ currentUserId: userId || 'guest' });
+        const finalUserId = userId || 'guest';
+        console.log('👤 Установлен пользователь избранного:', finalUserId);
+        
+        set({ 
+          currentUserId: finalUserId 
+        });
       },
       
       // Переключение избранного
-      toggleFavorite: (productId) => set((state) => {
-        const userId = state.currentUserId || 'guest';
-        const userFavorites = state.userFavorites[userId] || [];
+      toggleFavorite: (productId) => {
+        console.log('❤️ toggleFavorite вызван для productId:', productId);
         
-        let updatedFavorites;
-        if (userFavorites.includes(productId)) {
-          updatedFavorites = userFavorites.filter(id => id !== productId);
-        } else {
-          updatedFavorites = [...userFavorites, productId];
-        }
-        
-        return {
-          userFavorites: {
+        set((state) => {
+          const userId = state.currentUserId || 'guest';
+          const userFavorites = state.userFavorites[userId] || [];
+          
+          let updatedFavorites;
+          if (userFavorites.includes(productId)) {
+            updatedFavorites = userFavorites.filter(id => id !== productId);
+            console.log(`✅ Товар ${productId} удален из избранного пользователя ${userId}`);
+          } else {
+            updatedFavorites = [...userFavorites, productId];
+            console.log(`✅ Товар ${productId} добавлен в избранное пользователя ${userId}`);
+          }
+          
+          const newUserFavorites = {
             ...state.userFavorites,
             [userId]: updatedFavorites
-          }
-        };
-      }),
+          };
+          
+          console.log(`📊 Теперь в избранном ${updatedFavorites.length} товаров`);
+          
+          return {
+            userFavorites: newUserFavorites
+          };
+        });
+      },
       
       // Проверка избранного
       isFavorite: (productId) => {
         const state = get();
         const userId = state.currentUserId || 'guest';
         const userFavorites = state.userFavorites[userId] || [];
-        return userFavorites.includes(productId);
+        const result = userFavorites.includes(productId);
+        
+        console.log('❤️ isFavorite проверка:', productId, 'для', userId, '=', result);
+        
+        return result;
+      },
+      
+      // Удаление из избранного
+      removeFromFavorites: (productId) => {
+        console.log('🗑️ removeFromFavorites вызван для productId:', productId);
+        
+        set((state) => {
+          const userId = state.currentUserId || 'guest';
+          const userFavorites = state.userFavorites[userId] || [];
+          const updatedFavorites = userFavorites.filter(id => id !== productId);
+          
+          console.log(`✅ Товар ${productId} удален из избранного пользователя ${userId}`);
+          
+          return {
+            userFavorites: {
+              ...state.userFavorites,
+              [userId]: updatedFavorites
+            }
+          };
+        });
+      },
+      
+      // Очистка избранного текущего пользователя
+      clearFavorites: () => {
+        console.log('🧹 clearFavorites вызван');
+        
+        set((state) => {
+          const userId = state.currentUserId || 'guest';
+          
+          console.log(`✅ Избранное пользователя ${userId} очищено`);
+          
+          return {
+            userFavorites: {
+              ...state.userFavorites,
+              [userId]: []
+            }
+          };
+        });
       },
       
       // Синхронизация при входе
-      syncFavoritesOnLogin: (userId) => set((state) => {
-        const guestFavorites = state.userFavorites['guest'] || [];
-        const userFavorites = state.userFavorites[userId] || [];
+      syncFavoritesOnLogin: (userId) => {
+        console.log('🔄 syncFavoritesOnLogin для пользователя:', userId);
         
-        // Объединяем
-        const mergedFavorites = [...new Set([...userFavorites, ...guestFavorites])];
-        
-        return {
-          currentUserId: userId,
-          userFavorites: {
+        set((state) => {
+          const guestFavorites = state.userFavorites['guest'] || [];
+          const userFavorites = state.userFavorites[userId] || [];
+          
+          console.log('   Гостевое избранное:', guestFavorites.length, 'товаров');
+          console.log('   Пользовательское избранное до:', userFavorites.length, 'товаров');
+          
+          // Объединяем через Set для уникальности
+          const mergedFavorites = [...new Set([...userFavorites, ...guestFavorites])];
+          
+          const newUserFavorites = {
             ...state.userFavorites,
             [userId]: mergedFavorites,
-            'guest': []
-          }
-        };
-      }),
+            'guest': [] // Очищаем гостевую
+          };
+          
+          console.log('✅ Синхронизация избранного завершена');
+          console.log('   Пользовательское избранное после:', mergedFavorites.length, 'товаров');
+          
+          return {
+            currentUserId: userId,
+            userFavorites: newUserFavorites
+          };
+        });
+      },
       
       // Очистка при выходе
       clearOnLogout: () => {
+        console.log('👋 clearOnLogout избранного: сброс пользователя на guest');
         set({ currentUserId: 'guest' });
+      },
+      
+      // Получение избранного конкретного пользователя
+      getUserFavorites: (userId) => {
+        const state = get();
+        return state.userFavorites[userId] || [];
+      },
+      
+      // Получение всех пользовательских избранных
+      getAllFavorites: () => {
+        return get().userFavorites;
       }
     }),
     {
       name: 'favorites-storage-v4',
       storage: createJSONStorage(() => localStorage),
+      // Миграция из старой версии
+      migrate: (persistedState, version) => {
+        console.log('🔄 Миграция избранного с версии', version);
+        
+        if (!persistedState) {
+          console.log('   Нет сохраненных данных, создаем новую структуру');
+          return {
+            userFavorites: {},
+            currentUserId: 'guest'
+          };
+        }
+        
+        // Если старая структура с прямым массивом favorites
+        if (Array.isArray(persistedState)) {
+          console.log('   Конвертируем старые данные (прямой массив)');
+          return {
+            userFavorites: {
+              'guest': persistedState
+            },
+            currentUserId: 'guest'
+          };
+        }
+        
+        // Если старая структура с favorites но без userFavorites
+        if (persistedState.favorites && !persistedState.userFavorites) {
+          console.log('   Конвертируем старые данные (favorites)');
+          return {
+            userFavorites: {
+              'guest': persistedState.favorites || []
+            },
+            currentUserId: 'guest'
+          };
+        }
+        
+        // Если старая структура с userFavorites но без currentUserId
+        if (persistedState.userFavorites && !persistedState.currentUserId) {
+          console.log('   Добавляем currentUserId');
+          return {
+            ...persistedState,
+            currentUserId: 'guest'
+          };
+        }
+        
+        console.log('   Миграция не требуется');
+        return persistedState;
+      },
+      onRehydrateStorage: () => (state) => {
+        console.log('🔄 Избранное восстановлено из localStorage');
+        if (state) {
+          console.log('   Текущий пользователь:', state.currentUserId);
+          console.log('   Всего пользовательских избранных:', Object.keys(state.userFavorites || {}).length);
+        }
+      }
     }
   )
 );
@@ -419,6 +565,49 @@ const useAuthStore = create((set, get) => ({
   }
 }));
 
+// === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СИНХРОНИЗАЦИИ ===
+
+// Функция для синхронизации обоих хранилищ при входе
+const syncStoresOnLogin = (userId) => {
+  console.log('🔄 syncStoresOnLogin: Синхронизация всех хранилищ для пользователя:', userId);
+  
+  // Синхронизируем корзину
+  const cartStore = useCartStore.getState();
+  if (cartStore.syncCartOnLogin) {
+    cartStore.syncCartOnLogin(userId);
+  }
+  
+  // Синхронизируем избранное
+  const favoritesStore = useFavoritesStore.getState();
+  if (favoritesStore.syncFavoritesOnLogin) {
+    favoritesStore.syncFavoritesOnLogin(userId);
+  }
+  
+  // Устанавливаем пользователя в обоих хранилищах
+  cartStore.setCurrentUser(userId);
+  favoritesStore.setCurrentUser(userId);
+};
+
+// Функция для очистки при выходе
+const clearStoresOnLogout = () => {
+  console.log('👋 clearStoresOnLogout: Очистка всех хранилищ при выходе');
+  
+  const cartStore = useCartStore.getState();
+  const favoritesStore = useFavoritesStore.getState();
+  
+  if (cartStore.clearOnLogout) {
+    cartStore.clearOnLogout();
+  }
+  
+  if (favoritesStore.clearOnLogout) {
+    favoritesStore.clearOnLogout();
+  }
+  
+  // Устанавливаем гостевой режим
+  cartStore.setCurrentUser('guest');
+  favoritesStore.setCurrentUser('guest');
+};
+
 // === ФУНКЦИИ ДЛЯ ОТЛАДКИ ===
 if (typeof window !== 'undefined') {
   // Показать все пользовательские корзины
@@ -456,14 +645,125 @@ if (typeof window !== 'undefined') {
     }, 100);
   };
   
+  // Показать все пользовательские избранные
+  window.debugUserFavorites = () => {
+    const store = useFavoritesStore.getState();
+    console.log('=== ОТЛАДКА ПОЛЬЗОВАТЕЛЬСКИХ ИЗБРАННЫХ ===');
+    console.log('Текущий пользователь:', store.currentUserId);
+    console.log('Все избранные:');
+    
+    Object.entries(store.userFavorites).forEach(([userId, items]) => {
+      console.log(`👤 ${userId}: ${items.length} товаров`);
+      console.log('   Товары:', items);
+    });
+    
+    console.log('Текущее избранное (getFavorites()):', store.getFavorites());
+  };
+  
+  // Тест добавления в избранное
+  window.testAddToFavorites = () => {
+    const store = useFavoritesStore.getState();
+    const testProductId = 'test-fav-' + Date.now();
+    
+    console.log('🧪 Тест избранного для productId:', testProductId);
+    store.toggleFavorite(testProductId);
+    
+    // Проверка через секунду
+    setTimeout(() => {
+      console.log('✅ После теста:', store.getFavorites());
+      console.log('✅ isFavorite проверка:', store.isFavorite(testProductId));
+    }, 100);
+  };
+  
   // Очистить все данные
   window.clearAllCartData = () => {
     localStorage.removeItem('cart-storage-v4');
     localStorage.removeItem('favorites-storage-v4');
-    console.log('🧹 Все данные корзины очищены');
+    console.log('🧹 Все данные корзины и избранного очищены');
     window.location.reload();
+  };
+  
+  // Синхронизировать текущего пользователя
+  window.syncCurrentUser = () => {
+    const authStore = useAuthStore.getState();
+    if (authStore.user) {
+      const userId = authStore.user.email || authStore.user.uid || 'user';
+      console.log('🔄 Ручная синхронизация для пользователя:', userId);
+      syncStoresOnLogin(userId);
+    } else {
+      console.log('🔄 Ручная синхронизация для гостя');
+      clearStoresOnLogout();
+    }
   };
 }
 
+// === ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ===
+if (typeof window !== 'undefined') {
+  // Функция для инициализации пользователя при загрузке
+  const initializeUserStores = () => {
+    const authStore = useAuthStore.getState();
+    const cartStore = useCartStore.getState();
+    const favoritesStore = useFavoritesStore.getState();
+    
+    if (authStore.user && authStore.userData) {
+      const userId = authStore.user.email || authStore.user.uid || 'user';
+      console.log('🔄 Инициализация хранилищ для пользователя:', userId);
+      
+      // Устанавливаем текущего пользователя
+      if (cartStore.setCurrentUser) {
+        cartStore.setCurrentUser(userId);
+      }
+      
+      if (favoritesStore.setCurrentUser) {
+        favoritesStore.setCurrentUser(userId);
+      }
+      
+      // Синхронизируем данные
+      if (cartStore.syncCartOnLogin) {
+        cartStore.syncCartOnLogin(userId);
+      }
+      
+      if (favoritesStore.syncFavoritesOnLogin) {
+        favoritesStore.syncFavoritesOnLogin(userId);
+      }
+    } else {
+      console.log('🔄 Инициализация гостевого режима');
+      if (cartStore.setCurrentUser) {
+        cartStore.setCurrentUser('guest');
+      }
+      
+      if (favoritesStore.setCurrentUser) {
+        favoritesStore.setCurrentUser('guest');
+      }
+    }
+  };
+  
+  // Запускаем инициализацию после загрузки страницы
+  window.addEventListener('load', initializeUserStores);
+  
+  // Также запускаем при изменении состояния аутентификации
+  let unsubscribeAuth;
+  setTimeout(() => {
+    unsubscribeAuth = useAuthStore.subscribe((state) => {
+      if (!state.isLoading) {
+        initializeUserStores();
+      }
+    });
+  }, 100);
+  
+  // Очистка при размонтировании (если нужно)
+  window.addEventListener('beforeunload', () => {
+    if (unsubscribeAuth) {
+      unsubscribeAuth();
+    }
+  });
+}
+
 // Экспорт
-export { useCartStore, useFavoritesStore, useAuthStore };
+export { 
+  useCartStore, 
+  useFavoritesStore, 
+  useAuthStore, 
+  syncStoresOnLogin, 
+  clearStoresOnLogout 
+};

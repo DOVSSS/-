@@ -1,29 +1,28 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '../../store/store';
-import { useCartStore } from '../../store/store';
-import { useFavoritesStore } from '../../store/store';
+import { syncStoresOnLogin, clearStoresOnLogout } from '../../store/store';
 
 function AuthSync() {
-  const { user } = useAuthStore();
-  const setCartUser = useCartStore((state) => state.setCurrentUser);
-  const setFavoritesUser = useFavoritesStore((state) => state.setCurrentUser);
-  const clearOnLogoutCart = useCartStore((state) => state.clearOnLogout);
-  const clearOnLogoutFavorites = useFavoritesStore((state) => state.clearOnLogout);
+  const { user, userData } = useAuthStore();
 
   useEffect(() => {
-    console.log('🔄 AuthSync: пользователь изменился', user?.uid);
+    console.log('🔄 AuthSync: статус пользователя изменился', user?.email);
     
-    if (user) {
-      // Пользователь вошел - уже обработано в InitAuth
-      console.log('✅ Пользователь авторизован, корзина синхронизирована');
-    } else {
-      // Пользователь вышел
-      console.log('🚪 Выход пользователя');
-      clearOnLogoutCart();
-      clearOnLogoutFavorites();
+    if (user && userData) {
+      // Получаем ID пользователя
+      const userId = user.email || user.uid || 'user';
+      console.log('✅ Пользователь вошел:', userId);
+      
+      // Используем единую функцию синхронизации
+      syncStoresOnLogin(userId);
+    } else if (!user) {
+      console.log('🚪 Пользователь вышел');
+      // Используем единую функцию очистки
+      clearStoresOnLogout();
     }
-  }, [user, clearOnLogoutCart, clearOnLogoutFavorites, setCartUser, setFavoritesUser]);
+  }, [user, userData]);
 
+  // Этот компонент не рендерит ничего видимого
   return null;
 }
 
