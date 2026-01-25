@@ -1,0 +1,67 @@
+/* Для Tailwind CSS v3 используйте эти директивы */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Кастомные стили */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors;
+  }
+}
+
+/* Добавьте в конец файла */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Добавьте в конец файла */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для печати заказа */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-order, .print-order * {
+    visibility: visible;
+  }
+  .print-order {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

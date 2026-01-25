@@ -1,0 +1,141 @@
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import Header from '../../components/Header/Header';
+import BottomNav from '../../components/BottomNav/BottomNav';
+import Loader from '../../components/Loader/Loader';
+import { useAuthStore } from '../../store/store';
+
+// Ленивая загрузка страниц
+const Home = lazy(() => import('../../pages/Home/Home'));
+const ProductPage = lazy(() => import('../../pages/Product/ProductPage'));
+const Cart = lazy(() => import('../../pages/Cart/Cart'));
+const Favorites = lazy(() => import('../../pages/Favorites/Favorites'));
+const CatalogPage = lazy(() => import('../../pages/Catalog/CatalogPage'));
+const SearchPage = lazy(() => import('../../pages/Search/SearchPage'));
+const AdminLogin = lazy(() => import('../../pages/Admin/AdminLogin'));
+const AdminDashboard = lazy(() => import('../../pages/Admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('../../pages/Admin/AdminProducts'));
+const AddProduct = lazy(() => import('../../pages/Admin/AddProduct'));
+const AdminOrders = lazy(() => import('../../pages/Admin/AdminOrders'));
+const Login = lazy(() => import('../../pages/Auth/Login')); // <-- ДОБАВЬ
+const Register = lazy(() => import('../../pages/Auth/Register')); // <-- ДОБАВЬ
+const Profile = lazy(() => import('../../pages/Profile/Profile')); // <-- ДОБАВЬ
+
+// Защищенный роут для админа
+const AdminRoute = ({ children }) => {
+  const { isAdmin, user, isLoading } = useAuthStore();
+  
+  if (isLoading) {
+    return <Loader />;
+  }
+  
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Доступ запрещен</h2>
+          <p className="text-gray-600 mb-6">Только для администраторов</p>
+          <button
+            onClick={() => navigate('/')}
+            className="btn-primary"
+          >
+            На главную
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return children;
+};
+
+// Компонент для отображения Header/BottomNav на публичных страницах
+const PublicLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 pt-16">
+        <Outlet />
+      </main>
+      <BottomNav />
+    </div>
+  );
+};
+
+// Компонент для админских страниц (без Header/BottomNav)
+const AdminLayout = () => {
+  return (
+    <div className="min-h-screen">
+      <Outlet />
+    </div>
+  );
+};
+
+// Компонент для страниц авторизации (без Header/BottomNav)
+const AuthLayout = () => {
+  return (
+    <div className="min-h-screen">
+      <Outlet />
+    </div>
+  );
+};
+
+function AppRouter() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Routes>
+        {/* Публичные маршруты с Header и BottomNav */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/profile" element={<Profile />} /> {/* <-- ДОБАВЬ */}
+        </Route>
+        
+        {/* Маршруты авторизации (без Header/BottomNav) */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} /> {/* <-- ДОБАВЬ */}
+          <Route path="/register" element={<Register />} /> {/* <-- ДОБАВЬ */}
+        </Route>
+        
+        {/* Админские маршруты без Header и BottomNav */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }>
+            <Route index element={<AdminProducts />} />
+            <Route path="add" element={<AddProduct />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="stats" element={<div>Статистика</div>} />
+            <Route path="settings" element={<div>Настройки</div>} />
+          </Route>
+        </Route>
+        
+        {/* 404 */}
+        <Route path="*" element={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">404</h1>
+              <p className="text-gray-600 mb-8">Страница не найдена</p>
+              <a href="/" className="btn-primary">На главную</a>
+            </div>
+          </div>
+        } />
+      </Routes>
+    </Suspense>
+  );
+}
+
+export default AppRouter;

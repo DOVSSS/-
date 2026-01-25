@@ -1,0 +1,78 @@
+{
+  "name": "ChinaStore - Товары из Китая",
+  "short_name": "ChinaStore",
+  "description": "Интернет-магазин товаров из Китая. Прямые поставки, лучшие цены, быстрая доставка.",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "id": "/",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/public\favicon-32x32.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/Снимок экрана 2026-01-19 224958.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/Снимок экрана 2026-01-19 224958.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["shopping", "business", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Каталог товаров",
+      "short_name": "Каталог",
+      "description": "Посмотреть все товары",
+      "url": "/catalog",
+      "icons": [{ "src": "/icon-catalog.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Корзина",
+      "short_name": "Корзина",
+      "description": "Перейти в корзину",
+      "url": "/cart",
+      "icons": [{ "src": "/icon-cart.png", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
