@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiX } from 'react-icons/fi';
-// Используйте searchProducts вместо searchProductsSimple
+
 import { searchProducts } from '../../services/firebase/productService';
 
 const SearchBar = () => {
@@ -45,7 +45,7 @@ const SearchBar = () => {
     console.log('🔍 Поиск запроса:', query);
     
     try {
-      // Используйте searchProducts, а не searchProductsSimple
+     
       const searchResults = await searchProducts(query);
       console.log('✅ Найдено товаров:', searchResults.length);
       console.log('📦 Результаты:', searchResults);

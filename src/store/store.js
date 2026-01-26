@@ -322,8 +322,7 @@ const useFavoritesStore = create(
         const userId = state.currentUserId || 'guest';
         const favorites = state.userFavorites[userId] || [];
         
-        console.log('❤️ getFavorites вызван для пользователя:', userId);
-        console.log('❤️ Результат:', favorites.length, 'товаров');
+       
         
         return favorites;
       },
@@ -342,7 +341,7 @@ const useFavoritesStore = create(
       
       // Переключение избранного
       toggleFavorite: (productId) => {
-        console.log('❤️ toggleFavorite вызван для productId:', productId);
+       
         
         set((state) => {
           const userId = state.currentUserId || 'guest';
@@ -377,7 +376,7 @@ const useFavoritesStore = create(
         const userFavorites = state.userFavorites[userId] || [];
         const result = userFavorites.includes(productId);
         
-        console.log('❤️ isFavorite проверка:', productId, 'для', userId, '=', result);
+       
         
         return result;
       },
