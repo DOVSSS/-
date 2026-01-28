@@ -12,14 +12,14 @@ const Cart = lazy(() => import('../../pages/Cart/Cart'));
 const Favorites = lazy(() => import('../../pages/Favorites/Favorites'));
 const CatalogPage = lazy(() => import('../../pages/Catalog/CatalogPage'));
 const SearchPage = lazy(() => import('../../pages/Search/SearchPage'));
-const AdminLogin = lazy(() => import('../../pages/Admin/AdminLogin'));
+// УДАЛИТЬ: const AdminLogin = lazy(() => import('../../pages/Admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('../../pages/Admin/AdminDashboard'));
 const AdminProducts = lazy(() => import('../../pages/Admin/AdminProducts'));
 const AddProduct = lazy(() => import('../../pages/Admin/AddProduct'));
 const AdminOrders = lazy(() => import('../../pages/Admin/AdminOrders'));
-const Login = lazy(() => import('../../pages/Auth/Login')); // <-- ДОБАВЬ
-const Register = lazy(() => import('../../pages/Auth/Register')); // <-- ДОБАВЬ
-const Profile = lazy(() => import('../../pages/Profile/Profile')); // <-- ДОБАВЬ
+const Login = lazy(() => import('../../pages/Auth/Login'));
+const Register = lazy(() => import('../../pages/Auth/Register'));
+const Profile = lazy(() => import('../../pages/Profile/Profile'));
 
 // Защищенный роут для админа
 const AdminRoute = ({ children }) => {
@@ -30,7 +30,7 @@ const AdminRoute = ({ children }) => {
   }
   
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />; // Изменено с /admin/login на /login
   }
   
   if (!isAdmin) {
@@ -96,18 +96,18 @@ function AppRouter() {
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/favorites" element={<Favorites />} />
-          <Route path="/profile" element={<Profile />} /> {/* <-- ДОБАВЬ */}
+          <Route path="/profile" element={<Profile />} />
         </Route>
         
         {/* Маршруты авторизации (без Header/BottomNav) */}
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} /> {/* <-- ДОБАВЬ */}
-          <Route path="/register" element={<Register />} /> {/* <-- ДОБАВЬ */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Route>
         
         {/* Админские маршруты без Header и BottomNav */}
         <Route element={<AdminLayout />}>
-          <Route path="/admin/login" element={<AdminLogin />} />
+          {/* УДАЛИТЬ маршрут /admin/login */}
           
           <Route path="/admin/dashboard" element={
             <AdminRoute>

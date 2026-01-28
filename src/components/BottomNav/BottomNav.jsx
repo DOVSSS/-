@@ -7,16 +7,29 @@ import { useAuthStore } from '../../store/store';
 function BottomNav() {
   const location = useLocation();
   
-  // Используем функции вместо свойств
   const getTotalItems = useCartStore((state) => state.getTotalItems);
   const getFavorites = useFavoritesStore((state) => state.getFavorites);
   
-  // Вызываем функции для получения актуальных значений
   const totalItems = getTotalItems ? getTotalItems() : 0;
   const favorites = getFavorites ? getFavorites() : [];
   const favoriteCount = favorites.length;
   
   const { isAdmin, user } = useAuthStore();
+  
+  // Определяем путь для кнопки профиля/админки
+  const getProfilePath = () => {
+    if (!user) return '/login'; // Не авторизован - на логин
+    if (isAdmin) return '/admin/dashboard'; // Админ - в админку
+    return '/profile'; // Обычный пользователь - в профиль
+  };
+  
+  // Определяем активность кнопки
+  const isProfileActive = () => {
+    if (isAdmin) {
+      return location.pathname.includes('/admin/dashboard');
+    }
+    return location.pathname === '/profile';
+  };
   
   const navItems = [
     { 
@@ -56,10 +69,10 @@ function BottomNav() {
       active: location.pathname === '/cart'
     },
     { 
-      path: user ? '/profile' : '/login',
-      icon: isAdmin ? <FaUserShield className={location.pathname === '/profile' ? "text-blue-600" : ""} /> : <FaUser />,
+      path: getProfilePath(), // Динамический путь
+      icon: isAdmin ? <FaUserShield /> : <FaUser />,
       label: user ? (isAdmin ? 'Админ' : 'Профиль') : 'Войти',
-      active: location.pathname === '/profile' || location.pathname === '/login'
+      active: isProfileActive()
     },
   ];
 

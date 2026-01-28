@@ -177,14 +177,7 @@ function ProductCard({ product }) {
           </div>
           
           {/* Кнопка добавления в корзину */}
-          <button
-            onClick={handleAddToCart}
-            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            aria-label="Добавить в корзину"
-            title="Добавить в корзину"
-          >
-            <FaShoppingCart className="text-xs" />
-          </button>
+         
         </div>
       </div>
     </div>

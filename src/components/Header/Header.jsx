@@ -32,9 +32,17 @@ const Header = () => {
         {/* Верхняя панель */}
         <div className="flex items-center justify-between h-16">
           {/* Логотип */}
-          <Link to="/" className="text-xl font-semibold text-gray-800">
-            ChinaStore
-          </Link>
+         <div className="relative">
+  <div className="flex items-baseline">
+    <span className="text-2xl font-black text-gray-900">19</span>
+    <div className="relative">
+      <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">9</span>
+      <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+    </div>
+    <span className="text-2xl font-black text-gray-900">7</span>
+  </div>
+  <div className="text-xs font-medium text-gray-500 tracking-widest text-center -mt-1">STORE</div>
+</div>
 
           {/* Поиск (десктоп) */}
           <div className="hidden lg:block flex-1 max-w-md mx-8">
@@ -43,67 +51,21 @@ const Header = () => {
 
           {/* Иконки действий */}
           <div className="flex items-center gap-4">
-            <Link 
-              to="/favorites" 
-              className="p-2 text-gray-600 hover:text-blue-600 relative"
-              title="Избранное"
-            >
-              <FiHeart size={20} />
-            </Link>
+           
             
-            <Link 
-              to="/cart" 
-              className="p-2 text-gray-600 hover:text-blue-600 relative"
-              title="Корзина"
-            >
-              <FiShoppingCart size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </Link>
+          
             
-            <Link 
-              to="/admin/login" 
-              className="p-2 text-gray-600 hover:text-blue-600"
-              title="Админ панель"
-            >
-              <FiUser size={20} />
-            </Link>
+           
 
-            {/* Кнопка меню (мобильные) */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-600 hover:text-blue-600"
-            >
-              {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-            </button>
+           
           </div>
         </div>
 
         {/* Поиск (мобильные) */}
-        <div className="lg:hidden pb-3">
-          <SearchBar />
-        </div>
+        
 
         {/* Мобильное меню */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-4 py-3">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+       
       </div>
     </header>
   );

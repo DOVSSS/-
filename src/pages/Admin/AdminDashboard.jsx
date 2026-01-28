@@ -1,12 +1,12 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FaBox, FaPlus, FaSignOutAlt, FaChartBar, FaCog, FaShoppingCart } from 'react-icons/fa';
+import { FaBox, FaPlus, FaSignOutAlt, FaChartBar, FaCog, FaShoppingCart, FaHome } from 'react-icons/fa';
 import { auth } from '../../services/firebase/config';
 import { useAuthStore } from '../../store/store';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const clearUser = useAuthStore((state) => state.clearAuth);
+  const clearAuth = useAuthStore((state) => state.clearAuth); // Исправлено на clearAuth
   
   // Определяем активную вкладку из пути
   const getActiveTab = () => {
@@ -23,8 +23,8 @@ function AdminDashboard() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-     clearAuth(); 
-      navigate('/admin/login');
+      clearAuth(); 
+      navigate('/login'); // Изменено с /admin/login на /login
     } catch (error) {
       console.error('Ошибка выхода:', error);
     }
@@ -41,13 +41,15 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar для десктопа */}
-      <div className="hidden md:block fixed left-0 top-0 h-screen w-64 bg-white border-r">
-        <div className="p-6">
+      <div className="hidden md:block fixed left-0 top-0 h-screen w-64 bg-white border-r flex flex-col">
+        {/* Заголовок */}
+        <div className="p-6 border-b">
           <h1 className="text-xl font-bold text-gray-800">Админ-панель</h1>
           <p className="text-sm text-gray-600 mt-1">Магазин товаров из Китая</p>
         </div>
         
-        <nav className="mt-8">
+        {/* Основное меню */}
+        <nav className="flex-1 mt-4 overflow-y-auto">
           {menuItems.map((item) => (
             <a
               key={item.id}
@@ -68,10 +70,21 @@ function AdminDashboard() {
           ))}
         </nav>
         
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
+        {/* Нижняя часть - кнопки выхода и на главную */}
+        <div className="p-6 border-t space-y-4">
+          {/* Кнопка на главную */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 w-full px-4 py-3 rounded-lg transition-colors"
+          >
+            <FaHome />
+            <span>На главную</span>
+          </button>
+          
+          {/* Кнопка выхода */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 text-red-600 hover:text-red-700 w-full"
+            className="flex items-center gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 w-full px-4 py-3 rounded-lg transition-colors"
           >
             <FaSignOutAlt />
             <span>Выйти</span>
@@ -82,6 +95,15 @@ function AdminDashboard() {
       {/* Мобильная навигация */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50">
         <div className="flex justify-around py-3">
+          {/* Кнопка на главную в мобильной версии */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex flex-col items-center p-2 text-gray-600 hover:text-blue-600"
+          >
+            <FaHome className="text-xl" />
+            <span className="text-xs mt-1">Главная</span>
+          </button>
+          
           {menuItems.map((item) => (
             <a
               key={item.id}
@@ -98,13 +120,36 @@ function AdminDashboard() {
               <span className="text-xs mt-1">{item.label}</span>
             </a>
           ))}
+          
+          {/* Кнопка выхода в мобильной версии */}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center p-2 text-red-600 hover:text-red-700"
+          >
+            <FaSignOutAlt className="text-xl" />
+            <span className="text-xs mt-1">Выход</span>
+          </button>
         </div>
       </div>
 
-      {/* Основной контент - Outlet для дочерних роутов */}
-      <div className="md:ml-64 pb-16 md:pb-0">
+      {/* Основной контент */}
+      <div className="md:ml-64 pb-20 md:pb-0">
+        {/* Кнопка "На главную" для мобильной версии вверху */}
+        <div className="md:hidden p-4 bg-white border-b">
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-semibold">Админ-панель</h1>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg bg-blue-50"
+            >
+              <FaHome />
+              <span>На главную</span>
+            </button>
+          </div>
+        </div>
+        
         <div className="p-4 md:p-6">
-          <Outlet /> {/* ВАЖНО: здесь отображаются дочерние роуты */}
+          <Outlet />
         </div>
       </div>
     </div>

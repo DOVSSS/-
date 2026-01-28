@@ -30,7 +30,10 @@ function Login() {
       }
     } catch (error) {
       console.error('Ошибка входа:', error);
-      setError('Неверный email или пароль');
+      setError(error.message.includes('user-not-found') || error.message.includes('wrong-password')
+        ? 'Неверный email или пароль'
+        : 'Ошибка при входе'
+      );
     } finally {
       setLoading(false);
     }
@@ -45,6 +48,9 @@ function Login() {
           </h1>
           <p className="text-gray-600">
             Войдите для совершения покупок
+          </p>
+          <p className="text-sm text-blue-600 mt-2">
+            *Администраторы будут перенаправлены в админ-панель
           </p>
         </div>
 
@@ -98,21 +104,26 @@ function Login() {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-center text-gray-600 text-sm">
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+          <p className="text-gray-600 text-sm mb-4">
             Нет аккаунта?{' '}
             <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
               Зарегистрироваться
             </Link>
           </p>
-          <p className="text-center mt-2">
-            <button
-              onClick={() => navigate('/admin/login')}
-              className="text-gray-500 hover:text-gray-700 text-sm"
-            >
-              Войти как администратор
-            </button>
-          </p>
+          
+          {/* Тестовые данные для админа */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-xs text-gray-500 font-medium mb-1">
+              Тестовый доступ для админа:
+            </p>
+            <p className="text-xs text-gray-600">
+              Email: <span className="font-mono">admin@example.com</span>
+            </p>
+            <p className="text-xs text-gray-600">
+              Пароль: <span className="font-mono">admin123</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

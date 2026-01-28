@@ -59,7 +59,7 @@ export const searchProducts = async (searchTerm) => {
   }
 };
 
-// Получение всех товаров (ОДНА функция!)
+
 // Получение всех товаров (ОДНА функция!)
 export const getProducts = async () => {
   try {
