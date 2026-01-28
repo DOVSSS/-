@@ -10,7 +10,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'ChinaStore - Товары из Китая',
-        short_name: 'ChinaStore',
+        short_name: '1997',
         description: 'Магазин товаров из Китая',
         theme_color: '#3b82f6',
         background_color: '#ffffff',
