@@ -26,7 +26,6 @@ function Home() {
     
     // Фильтруем товары
     const filtered = allProducts.filter(product => {
-      // Проверяем различные поля товара
       const searchFields = [
         product.title,
         product.description,
@@ -50,8 +49,7 @@ function Home() {
       const productsRef = collection(db, 'products');
       const q = query(
         productsRef, 
-        // where('active', '==', true),
-        limit(50) // Увеличил лимит для лучшего поиска
+        limit(50)
       );
       
       const snapshot = await getDocs(q);
@@ -74,7 +72,7 @@ function Home() {
     return products.sort((a, b) => {
       const aScore = calculateRelevanceScore(a, queryText);
       const bScore = calculateRelevanceScore(b, queryText);
-      return bScore - aScore; // Сначала товары с большим score
+      return bScore - aScore;
     });
   };
 
@@ -82,30 +80,24 @@ function Home() {
   const calculateRelevanceScore = (product, queryText) => {
     let score = 0;
     
-    // Название (самый важный параметр)
     if (product.title?.toLowerCase().includes(queryText)) {
       score += 10;
-      // Если название начинается с запроса - дополнительный бонус
       if (product.title.toLowerCase().startsWith(queryText)) {
         score += 5;
       }
     }
     
-    // Категория
     if (product.category?.toLowerCase().includes(queryText)) {
       score += 8;
-      // Если точное совпадение категории
       if (product.category.toLowerCase() === queryText) {
         score += 4;
       }
     }
     
-    // Бренд
     if (product.brand?.toLowerCase().includes(queryText)) {
       score += 6;
     }
     
-    // Описание
     if (product.description?.toLowerCase().includes(queryText)) {
       score += 3;
     }
@@ -123,7 +115,7 @@ function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-center py-12">
             <Loader />
@@ -134,12 +126,10 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
     
-     
-      
       {/* Поисковая строка */}
-      <div className="sticky top-16 z-10 bg-white border-b px-4 py-3">
+      <div className="sticky top-16 z-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50 backdrop-blur-md bg-opacity-95 px-4 py-3">
         <div className="max-w-7xl mx-auto">
           <div className="relative">
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -148,13 +138,13 @@ function Home() {
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Поиск товаров..."
-              className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-sm"
+              className="w-full pl-10 pr-10 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 placeholder-gray-400 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 outline-none transition text-sm backdrop-blur-sm"
               autoComplete="off"
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
               >
                 <FiX />
               </button>
@@ -164,7 +154,7 @@ function Home() {
           {/* Индикатор поиска */}
           {searchQuery && (
             <div className="mt-2 flex justify-between items-center">
-              <span className="text-xs text-gray-600">
+              <span className="text-xs text-gray-300">
                 Найдено: {filteredProducts.length} товаров
                 <span className="ml-1 text-gray-400">
                   (всего: {allProducts.length})
@@ -172,7 +162,7 @@ function Home() {
               </span>
               <button
                 onClick={clearSearch}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text hover:from-blue-500 hover:to-purple-500 transition-all"
               >
                 Очистить поиск
               </button>
@@ -183,35 +173,29 @@ function Home() {
 
       {/* Основной контент */}
       <div className="max-w-7xl mx-auto px-0 py-6">
-        {/* Заголовок */}
-        <div className="mb-6">
-          <h1 className="text-xl font-medium text-gray-800">
-           
-          </h1>
-        </div>
         
         {/* Сетка товаров */}
         {filteredProducts.length > 0 ? (
           <ProductGrid products={filteredProducts} />
         ) : searchQuery ? (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4">
-              <FiSearch className="text-gray-400" size={20} />
+          <div className="text-center py-12 px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/50 mb-4">
+              <FiSearch className="text-gray-400" size={24} />
             </div>
-            <p className="text-gray-600 mb-2">Товары не найдены</p>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-gray-300 mb-2 text-lg">Товары не найдены</p>
+            <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
               Попробуйте изменить запрос или посмотрите все товары
             </p>
             <button
               onClick={clearSearch}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              className="px-6 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-gray-300 rounded-lg border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 text-sm font-medium"
             >
               Показать все товары
             </button>
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">Товары скоро появятся</p>
+            <p className="text-gray-400">Товары скоро появятся</p>
           </div>
         )}
       </div>
