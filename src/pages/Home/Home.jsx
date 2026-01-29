@@ -135,8 +135,8 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Пустое пространство под Header */}
-      <div className="pt-16"></div>
+    
+     
       
       {/* Поисковая строка */}
       <div className="sticky top-16 z-10 bg-white border-b px-4 py-3">
@@ -182,20 +182,11 @@ function Home() {
       </div>
 
       {/* Основной контент */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-0 py-6">
         {/* Заголовок */}
         <div className="mb-6">
           <h1 className="text-xl font-medium text-gray-800">
-            {searchQuery ? (
-              <>
-                Результаты поиска "{searchQuery}"
-                <span className="ml-2 text-sm font-normal text-gray-600">
-                  ({filteredProducts.length} товаров)
-                </span>
-              </>
-            ) : (
-              `Товары (${filteredProducts.length})`
-            )}
+           
           </h1>
         </div>
         

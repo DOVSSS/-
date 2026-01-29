@@ -16,7 +16,8 @@ function ProductGrid({ products, searchQuery = '' }) {
   });
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    // Убираем все отступы: gap-0 и px-0
+    <div className="grid grid-cols-2 gap-0 px-0">
       {sortedProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
