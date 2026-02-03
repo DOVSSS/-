@@ -171,10 +171,7 @@ export const updateProduct = async (id, productData) => {
 export const deleteProduct = async (id) => {
   try {
     const docRef = doc(db, 'products', id);
-    await updateDoc(docRef, {
-      active: false,
-      updatedAt: serverTimestamp()
-    });
+    await deleteDoc(docRef);  // <- ВМЕСТО updateDoc используйте deleteDoc
     return true;
   } catch (error) {
     console.error('Error deleting product:', error);
