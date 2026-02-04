@@ -1,11 +1,13 @@
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { useFavoritesStore } from '../../store/store';
 import { cloudinaryService } from '../../services/cloudinary/cloudinaryService';
 
-function ProductCard({ product }) {
+function ProductCard({ product, onProductClick }) {
   const isFavorite = useFavoritesStore((state) => state.isFavorite(product.id));
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   // Локальный fallback для изображений
   const getFallbackImage = () => {
@@ -79,11 +81,28 @@ function ProductCard({ product }) {
     e.target.onerror = null;
   };
 
+  // Обработчик успешной загрузки изображения
+  const handleImageLoad = () => {
+    setIsImageLoaded(true);
+  };
+
   // Обработчик избранного
   const handleToggleFavorite = (e) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product.id);
+  };
+
+  // Обработчик клика по карточке
+  const handleCardClick = (e) => {
+    // Если клик был по ссылке или кнопке избранного - не обрабатываем
+    if (e.target.closest('a') || e.target.closest('button')) {
+      return;
+    }
+    
+    if (onProductClick) {
+      onProductClick(product.id);
+    }
   };
 
   // Проверяем наличие скидки
@@ -93,29 +112,37 @@ function ProductCard({ product }) {
     : 0;
 
   return (
-    <div className="group relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden flex flex-col h-full shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-700/30">
-      {/* Упрощенный эффект свечения */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 via-transparent to-purple-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
-      
+    <div 
+      onClick={handleCardClick}
+      className="group relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden flex flex-col h-full border border-gray-700/30 cursor-pointer"
+    >
       <div className="relative flex-grow">
         <Link to={`/product/${product.id}`} className="block h-full">
           <div className="relative pt-[140%] overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
-            {/* Уменьшенный оверлей на изображении */}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 via-gray-900/0 to-transparent z-10 pointer-events-none opacity-80" />
+            {/* Скелетон загрузки */}
+            {!isImageLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"></div>
+            )}
             
             <img
               src={imageUrl}
               alt={product.title || 'Товар'}
-              className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className={`absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                isImageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               loading="lazy"
               onError={handleImageError}
+              onLoad={handleImageLoad}
               crossOrigin="anonymous"
             />
+            
+            {/* Уменьшенный оверлей на изображении */}
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 via-gray-900/0 to-transparent z-10 pointer-events-none opacity-80" />
             
             {/* Бейдж новинки - компактный */}
             {isNew && (
               <div className="absolute top-2 left-2 z-20">
-                <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg">
+                <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-md">
                   NEW
                 </div>
               </div>
@@ -126,7 +153,7 @@ function ProductCard({ product }) {
               <div className={`absolute z-20 ${
                 isNew ? 'top-9 left-2' : 'top-2 left-2'
               }`}>
-                <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg">
+                <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] font-bold px-2 py-1 rounded-md">
                   -{discountPercentage}%
                 </div>
               </div>
@@ -151,38 +178,35 @@ function ProductCard({ product }) {
         </Link>
       </div>
       
-      {/* Контент карточки - одна строка */}
-      <div className="p-3 bg-gradient-to-t from-gray-900/95 via-gray-900/90 to-gray-900/80 border-t border-gray-700/30">
+      {/* Контент карточки - только название и цена */}
+      <div className="p-3 bg-gradient-to-t from-gray-900 to-gray-900 border-t border-gray-700/30">
         <div className="flex items-center justify-between gap-2">
-          {/* Название товара - с градиентным текстом */}
+          {/* Название товара */}
           <Link to={`/product/${product.id}`} className="flex-grow min-w-0">
-            <h3 className="text-base font-medium truncate bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-500 hover:to-purple-500 transition-all duration-300">
+            <h3 className="text-sm font-medium truncate text-gray-300">
               {product.title || 'Без названия'}
             </h3>
           </Link>
           
-          {/* Цена - с градиентным текстом */}
+          {/* Цена */}
           <div className="flex-shrink-0">
             {hasDiscount ? (
               <div className="flex flex-col items-end">
-                <span className="font-bold text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="font-bold text-sm text-blue-400">
                   {product.price ? `${product.price.toLocaleString('ru-RU')} ₽` : '— ₽'}
                 </span>
-                <span className="text-[10px] text-gray-400 line-through mt-0.5">
+                <span className="text-[10px] text-gray-500 line-through">
                   {product.originalPrice.toLocaleString('ru-RU')} ₽
                 </span>
               </div>
             ) : (
-              <span className="font-bold text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="font-bold text-sm text-blue-400">
                 {product.price ? `${product.price.toLocaleString('ru-RU')} ₽` : 'Цена не указана'}
               </span>
             )}
           </div>
         </div>
       </div>
-      
-      {/* Минимальная подсветка при наведении */}
-      <div className="absolute -inset-px rounded-2xl border border-transparent group-hover:border-blue-500/10 transition-colors duration-300 pointer-events-none" />
     </div>
   );
 }

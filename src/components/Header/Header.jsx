@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import SearchBar from '../Search/SearchBar';
 
-const Header = () => {
+// ДОБАВЬТЕ пропс onProductSelect
+const Header = ({ onProductSelect }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
@@ -18,11 +19,9 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50 backdrop-blur-md bg-opacity-95">
-      {/* Эффект свечения снизу */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
       
       <div className="max-w-7xl mx-auto px-4">
-        {/* Верхняя панель */}
         <div className="flex items-center justify-between h-16">
           {/* Логотип */}
           <div className="relative">
@@ -39,16 +38,17 @@ const Header = () => {
 
           {/* Поисковая строка - ТОЛЬКО НА ПК */}
           <div className="hidden md:block flex-1 max-w-2xl mx-8">
-            <SearchBar />
+            {/* ПЕРЕДАЙТЕ onProductSelect в SearchBar */}
+            <SearchBar onProductSelect={onProductSelect} />
           </div>
 
-          {/* Пустое пространство справа для баланса */}
           <div className="w-10 md:hidden"></div>
         </div>
 
         {/* Поисковая строка на мобилках */}
         <div className="md:hidden pb-3 px-2">
-          <SearchBar />
+          {/* ПЕРЕДАЙТЕ onProductSelect в SearchBar */}
+          <SearchBar onProductSelect={onProductSelect} />
         </div>
       </div>
     </header>

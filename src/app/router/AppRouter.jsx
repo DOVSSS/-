@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import React, { createContext, useState, Suspense, lazy } from 'react'; // ДОБАВЬТЕ createContext
+import { Routes, Route, Navigate, Outlet, useOutletContext } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import Loader from '../../components/Loader/Loader';
@@ -10,9 +10,7 @@ const Home = lazy(() => import('../../pages/Home/Home'));
 const ProductPage = lazy(() => import('../../pages/Product/ProductPage'));
 const Cart = lazy(() => import('../../pages/Cart/Cart'));
 const Favorites = lazy(() => import('../../pages/Favorites/Favorites'));
-
 const SearchPage = lazy(() => import('../../pages/Search/SearchPage'));
-// УДАЛИТЬ: const AdminLogin = lazy(() => import('../../pages/Admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('../../pages/Admin/AdminDashboard'));
 const AdminProducts = lazy(() => import('../../pages/Admin/AdminProducts'));
 const AddProduct = lazy(() => import('../../pages/Admin/AddProduct'));
@@ -30,7 +28,7 @@ const AdminRoute = ({ children }) => {
   }
   
   if (!user) {
-    return <Navigate to="/login" replace />; // Изменено с /admin/login на /login
+    return <Navigate to="/login" replace />;
   }
   
   if (!isAdmin) {
@@ -40,8 +38,8 @@ const AdminRoute = ({ children }) => {
           <h2 className="text-xl font-semibold mb-4">Доступ запрещен</h2>
           <p className="text-gray-600 mb-6">Только для администраторов</p>
           <button
-            onClick={() => navigate('/')}
-            className="btn-primary"
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             На главную
           </button>
@@ -53,16 +51,26 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
+// Создайте контекст для передачи данных между Header и Home
+const ProductContext = createContext(); // ИСПОЛЬЗУЙТЕ createContext из React
+
 // Компонент для отображения Header/BottomNav на публичных страницах
 const PublicLayout = () => {
+  // СОСТОЯНИЕ ДЛЯ ВЫБРАННОГО ТОВАРА ИЗ ПОИСКА
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main >
-        <Outlet />
-      </main>
-      <BottomNav />
-    </div>
+    <ProductContext.Provider value={{ selectedProductId, setSelectedProductId }}>
+      <div className="min-h-screen flex flex-col">
+        {/* ПЕРЕДАЕМ setSelectedProductId В HEADER */}
+        <Header onProductSelect={setSelectedProductId} />
+        <main>
+          {/* ПЕРЕДАЕМ КОНТЕКСТ ЧЕРЕЗ OUTLET */}
+          <Outlet context={{ selectedProductId, setSelectedProductId }} />
+        </main>
+        <BottomNav />
+      </div>
+    </ProductContext.Provider>
   );
 };
 
@@ -84,14 +92,27 @@ const AuthLayout = () => {
   );
 };
 
+// Оберните Home в компонент, который получает контекст
+const HomeWithContext = () => {
+  // ПОЛУЧАЕМ КОНТЕКСТ ИЗ OUTLET
+  const { selectedProductId, setSelectedProductId } = useOutletContext();
+  
+  return (
+    <Home 
+      selectedProductId={selectedProductId}
+      setSelectedProductId={setSelectedProductId}
+    />
+  );
+};
+
 function AppRouter() {
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
         {/* Публичные маршруты с Header и BottomNav */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
-         
+          {/* ИСПОЛЬЗУЕМ HomeWithContext вместо Home */}
+          <Route path="/" element={<HomeWithContext />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/cart" element={<Cart />} />
@@ -107,8 +128,6 @@ function AppRouter() {
         
         {/* Админские маршруты без Header и BottomNav */}
         <Route element={<AdminLayout />}>
-          {/* УДАЛИТЬ маршрут /admin/login */}
-          
           <Route path="/admin/dashboard" element={
             <AdminRoute>
               <AdminDashboard />
@@ -129,7 +148,12 @@ function AppRouter() {
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-4">404</h1>
               <p className="text-gray-600 mb-8">Страница не найдена</p>
-              <a href="/" className="btn-primary">На главную</a>
+              <a 
+                href="/" 
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                На главную
+              </a>
             </div>
           </div>
         } />

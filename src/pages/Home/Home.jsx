@@ -1,151 +1,224 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
-import ProductGrid from '../../components/ProductGrid/ProductGrid';
+import SearchResults from '../../components/Search/SearchResults';
 import Loader from '../../components/Loader/Loader';
-import { getProducts, getCategories } from '../../services/firebase/productService';
-import { FiSearch, FiX } from 'react-icons/fi';
+import { getCategories, getProducts, searchProducts } from '../../services/firebase/productService';
+import { FiSearch, FiX, FiFilter } from 'react-icons/fi';
 
-const Home = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+const Home = ({ selectedProductId, setSelectedProductId }) => {
   const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Получаем параметры из URL
   const categoryFromUrl = searchParams.get('category') || 'all';
 
   useEffect(() => {
-    loadProductsAndCategories();
-  }, [categoryFromUrl]); // Загружаем при изменении категории из URL
+    loadInitialData();
+  }, []);
 
-  const loadProductsAndCategories = async () => {
-    setIsLoading(true);
+  const loadInitialData = async () => {
+    setIsLoadingProducts(true);
     try {
-      // Загружаем категории
       const categoriesData = await getCategories();
       setCategories(categoriesData);
 
-      // Загружаем продукты
       const productsData = await getProducts();
-      let filtered = [...productsData];
-
-      // Фильтруем по поисковому запросу
-      if (searchQuery.trim()) {
-        const queryText = searchQuery.toLowerCase().trim();
-        filtered = filtered.filter(product =>
-          product.title.toLowerCase().includes(queryText) ||
-          (product.description && product.description.toLowerCase().includes(queryText)) ||
-          (product.category && product.category.toLowerCase().includes(queryText))
-        );
-      }
-
-      // Фильтруем по категории из URL
-      if (categoryFromUrl !== 'all') {
-        filtered = filtered.filter(product => product.category === categoryFromUrl);
-      }
-
-      setProducts(filtered);
-      setFilteredProducts(filtered);
+      setAllProducts(productsData);
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Error loading initial data:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingProducts(false);
     }
   };
 
- 
+  // Поиск товаров
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const results = await searchProducts(searchQuery.trim());
+      setSearchResults(results);
+      // Используем переданный setSelectedProductId
+      if (setSelectedProductId) {
+        setSelectedProductId(null);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-  
+  // Обработчик выбора товара из поиска
+  const handleProductSelect = (productId) => {
+    console.log('🏠 Home: handleProductSelect вызван с ID:', productId);
+    // Используем переданный setSelectedProductId
+    if (setSelectedProductId) {
+      setSelectedProductId(productId);
+    }
+    setSearchQuery('');
+    setSearchResults([]);
+  };
 
   const clearSearch = () => {
     setSearchQuery('');
-    loadProductsAndCategories(); // Перезагружаем без поиска
+    setSearchResults([]);
+    // Используем переданный setSelectedProductId
+    if (setSelectedProductId) {
+      setSelectedProductId(null);
+    }
   };
 
   const clearCategory = () => {
     const params = new URLSearchParams(searchParams);
     params.delete('category');
     setSearchParams(params);
+    clearSearch();
   };
+
+  const handleBackToAll = () => {
+    clearSearch();
+  };
+
+  // Фильтрация товаров по категории
+  const getFilteredProducts = () => {
+    if (categoryFromUrl === 'all') {
+      return allProducts;
+    }
+    return allProducts.filter(product => product.category === categoryFromUrl);
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-     
+      {/* Поисковая строка */}
+      <div className="sticky top-16 z-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50 backdrop-blur-md bg-opacity-95 px-0 py-0">
+        <div className="max-w-7xl mx-auto">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Поиск товаров..."
+                className="w-full pl-10 pr-10 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 placeholder-gray-400 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 outline-none transition text-sm backdrop-blur-sm"
+                autoComplete="off"
+              />
+              {(searchQuery || searchResults.length > 0 || selectedProductId) && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                >
+                  <FiX />
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-       
-
-        {/* Фильтры (только категории) */}
-        <div className="mb-6">
-          <div className="bg-gray-800/30 rounded-lg border border-gray-700/50 p-4">
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex-1 min-w-[250px]">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Категория
-                </label>
-                <select
-                  value={categoryFromUrl}
-                  onChange={(e) => {
-                    const params = new URLSearchParams(searchParams);
-                    if (e.target.value === 'all') {
-                      params.delete('category');
-                    } else {
-                      params.set('category', e.target.value);
-                    }
-                    setSearchParams(params);
-                  }}
-                  className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-100 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 outline-none transition"
-                >
-                  <option value="all" className="bg-gray-800">Все категории</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat} className="bg-gray-800">
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-             
-            </div>
+        {/* Категории */}
+        <div className="mb-6 bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+          <div className="flex items-center gap-2 mb-3">
+            <FiFilter className="text-gray-400" />
+            <h2 className="text-sm font-medium text-gray-300">Категории</h2>
           </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {/* Кнопка "Все" */}
+            <button
+              onClick={() => {
+                clearCategory();
+                handleBackToAll();
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${categoryFromUrl === 'all' 
+                ? 'bg-blue-600 text-white border border-blue-500' 
+                : 'bg-gray-800/50 text-gray-300 border border-gray-700/50 hover:border-gray-600/50'
+              }`}
+            >
+              Все
+            </button>
+            
+            {/* Кнопки категорий */}
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams);
+                  params.set('category', cat);
+                  setSearchParams(params);
+                  handleBackToAll();
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${categoryFromUrl === cat
+                  ? 'bg-blue-600 text-white border border-blue-500' 
+                  : 'bg-gray-800/50 text-gray-300 border border-gray-700/50 hover:border-gray-600/50'
+                }`}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+          
+          {/* Активная категория с очисткой */}
+          {categoryFromUrl !== 'all' && (
+            <div className="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center">
+              <div>
+                <p className="text-gray-400 text-sm">Активная категория:</p>
+                <p className="text-blue-400 font-medium">{categoryFromUrl}</p>
+              </div>
+              <button
+                onClick={clearCategory}
+                className="px-3 py-1 text-xs bg-gray-800/50 text-gray-300 rounded border border-gray-700/50 hover:border-gray-600/50 transition"
+              >
+                Очистить
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Сетка товаров */}
-        {isLoading ? (
+        {/* Индикатор загрузки */}
+        {isLoadingProducts ? (
           <div className="flex justify-center py-12">
             <Loader />
           </div>
-        ) : filteredProducts.length > 0 ? (
-          <>
-            <div className="mb-4 flex justify-between items-center">
-              <p className="text-gray-300 text-sm">
-                Показано <span className="font-semibold text-gray-100">{filteredProducts.length}</span> товаров
-              </p>
-            </div>
-            <ProductGrid products={filteredProducts} />
-          </>
         ) : (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/50 mb-4">
-              <FiSearch className="text-gray-400" size={24} />
-            </div>
-            <p className="text-gray-300 mb-2 text-lg">Товары не найдены</p>
-            <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-              Попробуйте изменить запрос или выберите другую категорию
-            </p>
-            <button
-              onClick={() => {
-                clearSearch();
-                clearCategory();
-              }}
-              className="px-6 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-gray-300 rounded-lg border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 text-sm font-medium"
-            >
-              Показать все товары
-            </button>
-          </div>
+          <>
+            {/* Результаты поиска */}
+            {isSearching ? (
+              <div className="flex justify-center py-12">
+                <Loader />
+              </div>
+            ) : searchResults.length > 0 ? (
+              <SearchResults
+                searchResults={searchResults}
+                onProductSelect={handleProductSelect}
+                onClose={handleBackToAll}
+              />
+            ) : selectedProductId ? (
+              <SearchResults
+                productId={selectedProductId}
+                onClose={handleBackToAll}
+              />
+            ) : (
+              <SearchResults 
+                products={filteredProducts}
+                onClose={handleBackToAll}
+                activeCategory={categoryFromUrl !== 'all' ? categoryFromUrl : null}
+                onProductSelect={handleProductSelect}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

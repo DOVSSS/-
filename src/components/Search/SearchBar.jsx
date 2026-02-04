@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiX, FiShoppingBag } from 'react-icons/fi';
 import { searchProducts } from '../../services/firebase/productService';
 
-const SearchBar = () => {
+// ДОБАВЛЕНО: пропс onProductSelect
+const SearchBar = ({ onProductSelect }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const navigate = useNavigate();
   const searchRef = useRef(null);
 
   // Дебаунс запроса
@@ -65,17 +64,22 @@ const SearchBar = () => {
     }
   };
 
+  // ОБНОВЛЕНО: Передаем ID товара через onProductSelect
   const handleSelectProduct = (productId) => {
-    navigate(`/product/${productId}`);
+    if (onProductSelect) {
+      onProductSelect(productId);
+    }
     setQuery('');
     setResults([]);
     setShowResults(false);
   };
 
+  // Оставляем старую навигацию для поиска
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      // Можно оставить или убрать - зависит от нужного поведения
+      // navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
       setResults([]);
       setShowResults(false);
@@ -85,15 +89,6 @@ const SearchBar = () => {
   const formatPrice = (price) => {
     if (!price && price !== 0) return 'Цена не указана';
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && query.trim()) {
-      handleSubmit(e);
-    }
-    if (e.key === 'Escape') {
-      setShowResults(false);
-    }
   };
 
   return (
@@ -106,7 +101,6 @@ const SearchBar = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => query.length >= 2 && setShowResults(true)}
-            onKeyDown={handleKeyDown}
             placeholder="Поиск товаров..."
             className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm"
             autoComplete="off"
@@ -127,15 +121,6 @@ const SearchBar = () => {
             </button>
           )}
         </div>
-        
-        {query.length >= 2 && !showResults && (
-          <button
-            type="submit"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-          >
-            Искать
-          </button>
-        )}
       </form>
 
       {/* Результаты поиска */}
@@ -171,18 +156,10 @@ const SearchBar = () => {
                         e.target.src = '/placeholder-image.jpg';
                       }}
                     />
-                    {!product.active && (
-                      <div className="absolute inset-0 bg-red-500/10 rounded-md border border-red-300 flex items-center justify-center">
-                        <span className="text-xs text-red-600 font-medium">Скрыт</span>
-                      </div>
-                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate group-hover:text-blue-700 transition-colors">
                       {product.title}
-                      {!product.active && (
-                        <span className="ml-2 text-xs text-red-600">(скрыт)</span>
-                      )}
                     </p>
                     {product.category && (
                       <p className="text-xs text-gray-500 truncate">
@@ -204,30 +181,8 @@ const SearchBar = () => {
               </div>
               <p className="text-gray-700 font-medium mb-1">Ничего не найдено</p>
               <p className="text-gray-500 text-sm">Попробуйте изменить запрос</p>
-              <button
-                onClick={() => {
-                  navigate('/');
-                  setQuery('');
-                  setShowResults(false);
-                }}
-                className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Посмотреть все товары
-              </button>
             </div>
           ) : null}
-          
-          {results.length > 0 && (
-            <div className="p-3 border-t border-gray-100 bg-gray-50">
-              <button
-                onClick={handleSubmit}
-                className="w-full py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <FiSearch />
-                Показать все результаты ({results.length})
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>
