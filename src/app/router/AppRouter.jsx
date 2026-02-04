@@ -10,7 +10,7 @@ const Home = lazy(() => import('../../pages/Home/Home'));
 const ProductPage = lazy(() => import('../../pages/Product/ProductPage'));
 const Cart = lazy(() => import('../../pages/Cart/Cart'));
 const Favorites = lazy(() => import('../../pages/Favorites/Favorites'));
-const CatalogPage = lazy(() => import('../../pages/Catalog/CatalogPage'));
+
 const SearchPage = lazy(() => import('../../pages/Search/SearchPage'));
 // УДАЛИТЬ: const AdminLogin = lazy(() => import('../../pages/Admin/AdminLogin'));
 const AdminDashboard = lazy(() => import('../../pages/Admin/AdminDashboard'));
@@ -91,7 +91,7 @@ function AppRouter() {
         {/* Публичные маршруты с Header и BottomNav */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/catalog" element={<CatalogPage />} />
+         
           <Route path="/search" element={<SearchPage />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/cart" element={<Cart />} />
