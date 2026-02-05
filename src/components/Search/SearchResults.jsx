@@ -136,14 +136,14 @@ const SearchResults = ({ productId, searchQuery, searchResults, products, active
     if (displayMode === 'product') return 'Выбранный товар';
     if (displayMode === 'search') return `Результаты поиска: "${searchQuery}"`;
     if (activeCategory) return `Категория: ${activeCategory}`;
-    return 'Все товары';
+    
   };
 
   const displaySubtitle = () => {
     if (displayMode === 'product') return 'и похожие товары';
     if (displayMode === 'search') return `Найдено: ${allProducts.length} товаров`;
     if (activeCategory) return `Товаров в категории: ${allProducts.length}`;
-    return `Всего товаров: ${allProducts.length}`;
+    
   };
 
   const displayProducts = () => {

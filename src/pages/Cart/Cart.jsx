@@ -194,7 +194,7 @@ function Cart() {
       </div>
 
       {/* Итого и кнопка заказа */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 space-y-4">
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t p-4 space-y-4">
         <div className="flex justify-between items-center">
           <span className="text-lg">Итого:</span>
           <span className="text-2xl font-bold text-blue-600">

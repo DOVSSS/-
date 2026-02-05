@@ -100,34 +100,9 @@ const Home = ({ selectedProductId, setSelectedProductId }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Поисковая строка */}
-      <div className="sticky top-16 z-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50 backdrop-blur-md bg-opacity-95 px-0 py-0">
-        <div className="max-w-7xl mx-auto">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Поиск товаров..."
-                className="w-full pl-10 pr-10 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-100 placeholder-gray-400 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 outline-none transition text-sm backdrop-blur-sm"
-                autoComplete="off"
-              />
-              {(searchQuery || searchResults.length > 0 || selectedProductId) && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                >
-                  <FiX />
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      </div>
+      
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-0 py-0">
         {/* Категории */}
         <div className="mb-6 bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
           <div className="flex items-center gap-2 mb-3">
