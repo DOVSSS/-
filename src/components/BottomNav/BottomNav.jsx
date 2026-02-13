@@ -34,7 +34,7 @@ function BottomNav() {
     
     const id = setTimeout(() => {
       setIsVisible(false);
-    }, 3000); // 3 секунды бездействия
+    }, 4000); // 3 секунды бездействия
     
     setTimeoutId(id);
   };
