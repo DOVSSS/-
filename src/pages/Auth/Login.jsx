@@ -49,9 +49,7 @@ function Login() {
           <p className="text-gray-600">
             Войдите для совершения покупок
           </p>
-          <p className="text-sm text-blue-600 mt-2">
-            *Администраторы будут перенаправлены в админ-панель
-          </p>
+         
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -113,17 +111,7 @@ function Login() {
           </p>
           
           {/* Тестовые данные для админа */}
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-xs text-gray-500 font-medium mb-1">
-              Тестовый доступ для админа:
-            </p>
-            <p className="text-xs text-gray-600">
-              Email: <span className="font-mono">admin@example.com</span>
-            </p>
-            <p className="text-xs text-gray-600">
-              Пароль: <span className="font-mono">admin123</span>
-            </p>
-          </div>
+          
         </div>
       </div>
     </div>
